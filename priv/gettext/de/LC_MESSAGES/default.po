@@ -1,0 +1,129 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: lib/my_app_web/error.ex:65
+#, elixir-autogen, elixir-format
+msgid "An unknown error occurred."
+msgstr "Ein unbekannter Fehler ist aufgetreten."
+
+#: lib/my_app_web/components/core/containers/drawer.ex:122
+#: lib/my_app_web/components/core/containers/drawer.ex:140
+#: lib/my_app_web/components/core/containers/modal.ex:119
+#: lib/my_app_web/components/core/containers/modal.ex:137
+#, elixir-autogen, elixir-format
+msgid "Close"
+msgstr "Schliessen"
+
+#: lib/my_app_web/components/core/toast.ex:74
+#, elixir-autogen, elixir-format
+msgid "Error"
+msgstr "Fehler"
+
+#: lib/my_app_web/components/core/toast.ex:73
+#, elixir-autogen, elixir-format
+msgid "Info"
+msgstr "Info"
+
+#: lib/my_app_web/components/core/toast.ex:75
+#, elixir-autogen, elixir-format
+msgid "Success"
+msgstr "Erfolg"
+
+#: lib/my_app_web/components/core/toast.ex:76
+#, elixir-autogen, elixir-format
+msgid "Warning"
+msgstr "Warnung"
+
+#: lib/my_app_web/components/core/layouts/app.ex:64
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Core.Layouts.App"
+msgid "Sign in"
+msgstr "Login"
+
+#: lib/my_app_web/components/core/layouts/app.ex:61
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Core.Layouts.App"
+msgid "Sign out"
+msgstr "Logout"
+
+#: lib/my_app_web/live/start.ex:14
+#: lib/my_app_web/live/start.ex:23
+#, elixir-autogen, elixir-format
+msgid "Landing"
+msgstr "Startseite"
+
+#: lib/my_app_web/components/cinder/filters/autocomplete.ex:37
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Cinder.Filters.Autocomplete"
+msgid "Search %{label}..."
+msgstr "%{label} suchen..."
+
+#: lib/my_app_web/components/cinder/filters/multi_select.ex:97
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Cinder.Filters.MultiSelect"
+msgid "Clear all"
+msgstr "Alle entfernen"
+
+#: lib/my_app_web/components/cinder/filters/multi_select.ex:84
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Cinder.Filters.MultiSelect"
+msgid "Match all"
+msgstr "Alle müssen zutreffen"
+
+#: lib/my_app_web/components/cinder/filters/multi_select.ex:49
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Cinder.Filters.MultiSelect"
+msgid "Search %{label}..."
+msgstr "%{label} suchen..."
+
+#: lib/my_app_web/components/cinder/filters/shared.ex:23
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Cinder.Filters.Shared"
+msgid "All"
+msgstr "Alle"
+
+#: lib/my_app_web/components/core/inputs/combobox.ex:161
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Core.Inputs.Combobox"
+msgid "Toggle options"
+msgstr "Optionen ein-/ausblenden"
+
+#: lib/my_app_web/components/core/inputs/combobox.ex:179
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Core.Inputs.Combobox"
+msgid "Type to search more options…"
+msgstr "Tippen, um weitere Optionen zu suchen…"
+
+#: lib/my_app_web/components/core/inputs/listbox.ex:134
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Core.Inputs.Listbox"
+msgid "No results found"
+msgstr "Keine Ergebnisse gefunden"
+
+#: lib/my_app_web/components/core/inputs/listbox.ex:133
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Core.Inputs.Listbox"
+msgid "None"
+msgstr "Keine"
+
+#: lib/my_app_web/components/core/inputs/multi_select.ex:187
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Core.Inputs.MultiSelect"
+msgid "Toggle options"
+msgstr "Optionen ein-/ausblenden"
+
+#: lib/my_app_web/components/core/inputs/multi_select.ex:205
+#, elixir-autogen, elixir-format
+msgctxt "MyAppWeb.Components.Core.Inputs.MultiSelect"
+msgid "Type to search more options…"
+msgstr "Tippen, um weitere Optionen zu suchen …"

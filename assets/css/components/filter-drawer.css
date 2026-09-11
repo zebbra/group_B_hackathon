@@ -1,0 +1,62 @@
+/* Cinder filter controls: desktop lets the filters flow inline (display:contents);
+   below md they become a right-side slide-in drawer toggled via `data-open`. */
+@layer components {
+  .filter-drawer {
+    display: contents;
+  }
+
+  .filter-drawer-backdrop {
+    display: none;
+  }
+
+  @media (width < 48rem) {
+    body:has(.filter-drawer[data-open]) {
+      overflow: hidden;
+    }
+
+    .filter-drawer {
+      position: fixed;
+      inset-block: 0;
+      inset-inline-end: 0;
+      z-index: 70;
+      display: flex;
+      width: 20rem;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 1rem;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      background-color: var(--color-base-100);
+      box-shadow: var(--shadow-xl);
+      translate: 100%;
+      visibility: hidden;
+      transition:
+        translate 300ms ease-out,
+        visibility 0s linear 300ms;
+    }
+
+    .filter-drawer[data-open] {
+      translate: 0;
+      visibility: visible;
+      transition:
+        translate 300ms ease-out,
+        visibility 0s;
+    }
+
+    .filter-drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: block;
+      background-color: rgb(0 0 0 / 0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 300ms ease-out;
+    }
+
+    .filter-drawer-backdrop[data-open] {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+}

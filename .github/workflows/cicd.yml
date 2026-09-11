@@ -1,0 +1,262 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+
+env:
+  MIX_ENV: test
+  MIX_OS_DEPS_COMPILE_PARTITION_COUNT: '4'
+  SENTRY_ENVIRONMENT: ci
+  DATABASE_URL: ecto://postgres:postgres@localhost:5432/my_app_test
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: hetzner
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        ports: ['5432:5432']
+        env:
+          POSTGRES_DB: my_app_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
+          version-type: strict
+
+      - name: Restore cache
+        id: restore-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            deps
+            _build
+            priv/plts
+          key: ${{ runner.os }}-mix-${{ hashFiles('.tool-versions') }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ hashFiles('.tool-versions') }}-
+            ${{ runner.os }}-mix-
+
+      - name: Install mix dependencies
+        run: mix deps.get --check-locked
+
+      - name: Compile dependencies
+        run: mix deps.compile --warnings-as-errors
+
+      - name: Build PLTs
+        run: mix dialyzer --plt
+
+      - name: Save cache
+        uses: actions/cache/save@v6
+        if: success() && steps.restore-cache.outputs.cache-hit != 'true'
+        with:
+          path: |
+            deps
+            _build
+            priv/plts
+          key: ${{ runner.os }}-mix-${{ hashFiles('.tool-versions') }}-${{ hashFiles('mix.lock') }}
+
+
+      - name: Install asset dependencies
+        run: mix assets.setup
+
+      - run: mix lint
+
+      - name: Dialyzer
+        run: mix dialyzer --format github
+
+      - name: Build docs
+        run: mix docs
+
+      - name: Build assets
+        run: mix assets.build
+
+      - run: mix test
+
+      - name: Test Summary
+        uses: test-summary/action@v2.6
+        with:
+          paths: test/reports/test-junit-report.xml
+        if: always()
+
+  build:
+    name: Build and scan Docker image
+    permissions:
+      contents: write
+      pull-requests: write
+    needs: test
+    runs-on: hetzner
+    steps:
+      - name: Get token for gh app Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v5.1.1
+        with:
+          application_id: ${{ secrets.GH_RUNNER_APPLICATION_ID }}
+          application_private_key: ${{ secrets.GH_RUNNER_APPLICATION_PRIVATE_KEY }}
+          revoke_token: true
+
+      - uses: actions/checkout@v7.0.1
+        with:
+          token: ${{ steps.get_workflow_token.outputs.token }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.3.0
+        with:
+          buildkitd-config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
+
+      - name: Generate image tags
+        id: meta
+        uses: docker/metadata-action@v6.2.0
+        with:
+          images: |
+            quay.io/zebbra/my_app
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=tag
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Login to quay.io
+        if: github.ref == 'refs/heads/main' || github.ref_type == 'tag'
+        uses: docker/login-action@v4.6.0
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Read .tool-versions
+        uses: marocchino/tool-versions-action@v2
+        id: versions
+
+      # Build into the local docker daemon so Trivy can scan the exact image
+      # before the push step below publishes it.
+      - name: Build image
+        uses: docker/build-push-action@v7.3.0
+        with:
+          context: .
+          push: false
+          load: true
+          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=my-app-${{ github.ref_name }}
+          cache-to: type=gha,scope=my-app-${{ github.ref_name }},mode=max,ignore-error=true
+          build-args: |
+            OTP_VERSION=${{ steps.versions.outputs.erlang }}
+            ELIXIR_VERSION=${{ steps.versions.outputs.elixir }}
+            APP_VERSION=${{ github.ref_type == 'tag' && github.ref_name || '0.0.42' }}
+
+      # metadata-action emits one tag per line; they all point at the same
+      # image, so scanning the first one scans the same bits as the rest.
+      - name: Resolve image reference to scan
+        id: image
+        run: echo "ref=$(head -n1 <<< '${{ steps.meta.outputs.tags }}')" >> "$GITHUB_OUTPUT"
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.ref }}
+          scan-type: image
+          format: table
+          output: trivy.txt
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          hide-progress: true
+
+      - name: Publish Trivy output to summary
+        if: always()
+        run: |
+          {
+            echo "## Trivy scan: ${{ steps.image.outputs.ref }}"
+            if [[ -s trivy.txt ]]; then
+              echo "<details><summary>Click to expand</summary>"
+              echo ""
+              echo '```'
+              cat trivy.txt
+              echo '```'
+              echo "</details>"
+            else
+              echo "No CRITICAL/HIGH fixable vulnerabilities found."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Only runs once the build and the scan above are both green.
+      - name: Push image
+        if: false # ${{ github.ref == 'refs/heads/main' || github.ref_type == 'tag' }}
+        run: docker push --all-tags quay.io/zebbra/my_app
+
+  deploy_zebbra:
+    name: Deploy to zebbra staging
+    permissions:
+      contents: write
+      pull-requests: write
+    needs: build
+    if: github.repository == 'zebbra/my_app' && github.ref_type == 'tag'
+    runs-on: hetzner
+    environment: zebbra
+    steps:
+      - name: Get token for gh app Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v5.1.1
+        with:
+          application_id: ${{ secrets.GH_RUNNER_APPLICATION_ID }}
+          application_private_key: ${{ secrets.GH_RUNNER_APPLICATION_PRIVATE_KEY }}
+          revoke_token: true
+
+      - uses: actions/checkout@v7.0.1
+        with:
+          token: ${{ steps.get_workflow_token.outputs.token }}
+
+      - name: Update Helm chart version and appVersion
+        run: |
+          VERSION=${GITHUB_REF_NAME}
+
+          if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Updating version and appVersion to $VERSION"
+
+            git fetch origin main:main
+            git checkout main
+            git pull origin main
+
+            perl -i -pe "s/^appVersion: .*/appVersion: \"$VERSION\"/" helm/charts/my_app/Chart.yaml
+            perl -i -pe "s/^version: .*/version: $VERSION/" helm/charts/my_app/Chart.yaml
+
+            git config --local user.email "ci-bot@zebbra.ch"
+            git config --local user.name "ci_bot"
+
+            git add helm/charts/my_app/Chart.yaml
+            git commit -m "Update Helm chart version and appVersion to $VERSION"
+
+            git push origin main
+
+            echo "Pushed Helm chart updates to main branch"
+          else
+            echo "No valid version tag $VERSION, must be of format 1.0.42. Helm Chart will not be updated."
+          fi

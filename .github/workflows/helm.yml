@@ -1,0 +1,55 @@
+name: Helm
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "helm/charts/my_app/**"
+
+jobs:
+
+  # a tag makes cicd.yml bump Chart.yaml on main
+  # -> which triggers this publish job
+  publish:
+    name: Publish Helm chart
+    runs-on: hetzner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v5
+
+      - name: Run Helm lint
+        run: |
+          helm lint helm/charts/my_app
+
+      - name: Login to Quay.io
+        run: |
+          helm registry login quay.io \
+            --username "${{ secrets.QUAY_USERNAME }}" \
+            --password "${{ secrets.QUAY_PASSWORD }}"
+
+      - name: Package and push Helm chart
+        run: |
+          echo "Packaging and pushing Helm chart..."
+          CHART_FILE=$(helm package helm/charts/my_app | sed -n "s/^Successfully packaged chart and saved it to: //p")
+          helm push "$CHART_FILE" oci://quay.io/zebbra/charts
+
+  # a tag makes cicd.yml bump Chart.yaml on main
+  # -> which triggers the publish job above
+  # -> which notifies the deployment repo
+  # -> which deploys the new chart version to the cluster w/ argocd
+  dispatch:
+    name: Notify deployment repo
+    needs: publish
+    runs-on: hetzner
+
+    steps:
+      - name: Trigger Helm chart update
+        uses: peter-evans/repository-dispatch@v4
+        with:
+          token: ${{ secrets.DEPLOYMENT_REPO_DISPATCH_PAT }}
+          repository: zebbra/my_app_deployment
+          event-type: update_helm_chart

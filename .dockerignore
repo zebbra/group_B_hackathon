@@ -1,0 +1,13 @@
+assets/node_modules
+
+# Build artefacts and caches — the image builds its own
+_build
+deps
+doc
+priv/plts
+assets/node_modules
+
+# Not needed to build a release
+.git
+.github
+test

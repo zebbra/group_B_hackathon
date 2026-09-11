@@ -1,0 +1,36 @@
+{
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "../deps/*"
+  ],
+  "scripts": {
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier --check .",
+    "lint:tsc": "tsc",
+    "format:eslint": "eslint --fix .",
+    "format:prettier": "prettier --write ."
+  },
+  "dependencies": {
+    "live_toast": "workspace:*",
+    "phoenix": "workspace:*",
+    "phoenix_html": "workspace:*",
+    "phoenix_live_view": "workspace:*",
+    "daisyui": "^5.7.32",
+    "tailwindcss": "^4.3.3",
+    "topbar": "^3.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/phoenix": "^1.6.7",
+    "eslint": "^10.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.70.0",
+    "@typescript-eslint/parser": "^8.70.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "extraKnownMarketplaces": {
+    "zen-x": {
+      "source": {
+        "source": "github",
+        "repo": "zebbra/zen-x"
+      }
+    },
+    "superpowers-dev": {
+      "source": {
+        "source": "github",
+        "repo": "obra/superpowers"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "zen-x@zen-x": true,
+    "zen-elixir@zen-x": true,
+    "superpowers@superpowers-dev": true
+  }
+}

@@ -1,0 +1,11 @@
+## "msgid"s in this file come from ash_authentication_phoenix components,
+### rendered through the `gettext_backend` option on `sign_in_route`.
+### They are built at runtime inside the dependency, so `mix gettext.extract`
+### cannot see them — maintain this file by hand.
+msgid ""
+msgstr ""
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Sign in with Sso"
+msgstr "Sign in with SSO"
