@@ -56,12 +56,6 @@ msgctxt "MyAppWeb.Components.Core.Layouts.App"
 msgid "Sign out"
 msgstr "Se déconnecter"
 
-#: lib/my_app_web/live/start.ex:14
-#: lib/my_app_web/live/start.ex:23
-#, elixir-autogen, elixir-format
-msgid "Landing"
-msgstr "Accueil"
-
 #: lib/my_app_web/components/cinder/filters/autocomplete.ex:37
 #, elixir-autogen, elixir-format
 msgctxt "MyAppWeb.Components.Cinder.Filters.Autocomplete"
@@ -127,3 +121,13 @@ msgstr "Afficher/masquer les options"
 msgctxt "MyAppWeb.Components.Core.Inputs.MultiSelect"
 msgid "Type to search more options…"
 msgstr "Tapez pour rechercher plus d'options…"
+
+#: lib/my_app_web/live/check_in.ex:66
+#, elixir-autogen, elixir-format
+msgid "Cookies are disabled, so you can watch the board but not check in."
+msgstr ""
+
+#: lib/my_app_web/live/check_in.ex:24
+#, elixir-autogen, elixir-format
+msgid "Position check-in"
+msgstr ""

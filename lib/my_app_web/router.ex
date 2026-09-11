@@ -56,6 +56,10 @@ defmodule MyAppWeb.Router do
     plug :load_from_session
   end
 
+  pipeline :participant do
+    plug MyAppWeb.Plugs.ParticipantSession
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
     plug :load_from_bearer
@@ -63,7 +67,7 @@ defmodule MyAppWeb.Router do
   end
 
   scope "/", MyAppWeb.Live do
-    pipe_through [:locale, :browser]
+    pipe_through [:locale, :browser, :participant]
 
     ash_authentication_live_session :authenticated_routes, on_mount: [LiveLocale] do
       # in each liveview, add one of the following at the top of the module:
@@ -77,7 +81,7 @@ defmodule MyAppWeb.Router do
       # If an authenticated user must *not* be present:
       # on_mount {MyAppWeb.Hooks.LiveUserAuth, :live_no_user}
 
-      live "/", Start
+      live "/", CheckIn
     end
   end
 

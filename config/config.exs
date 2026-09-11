@@ -80,6 +80,8 @@ config :cinder, :filters, %{
 
 config :cinder, default_theme: MyAppWeb.Components.Cinder.Theme
 
+config :elixir, :time_zone_database, Tz.TimeZoneDatabase
+
 # Configure Cldr
 config :ex_cldr,
   default_backend: MyAppWeb.Cldr,
@@ -122,12 +124,13 @@ config :my_app, Oban,
   # here, and disables the peer when `:plugins` is empty.
   plugins: [{Oban.Plugins.Cron, []}]
 
+config :my_app, :display_time_zone, "Europe/Zurich"
 config :my_app, :oidc_enabled, System.get_env("OIDC_ENABLED", "false") in ~w(true 1)
 
 config :my_app,
   ecto_repos: [MyApp.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [MyApp.Accounts],
+  ash_domains: [MyApp.Accounts, MyApp.Positions],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
 # Use Jason for JSON parsing in Phoenix
