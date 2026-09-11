@@ -49,6 +49,13 @@ defmodule MyApp.Accounts.User do
         end
       end
 
+      password :password do
+        identity_field :email
+
+        # Registration stays magic-link only; password users come from seeds (`:seed_with_password`).
+        registration_enabled? false
+      end
+
       remember_me :remember_me
     end
   end
@@ -108,6 +115,16 @@ defmodule MyApp.Accounts.User do
       run AshAuthentication.Strategy.MagicLink.Request
     end
 
+    create :seed_with_password do
+      description "Creates a user with a password. Used by seeds only."
+      accept [:email, :given_name, :family_name]
+      argument :password, :string, allow_nil?: false, sensitive?: true
+      upsert? true
+      upsert_identity :unique_email
+      upsert_fields [:given_name, :family_name]
+      change {AshAuthentication.Strategy.Password.HashPasswordChange, strategy_name: :password}
+    end
+
     create :register_with_sso do
       argument :user_info, :map, allow_nil?: false
       argument :oauth_tokens, :map, allow_nil?: false
@@ -148,6 +165,10 @@ defmodule MyApp.Accounts.User do
     attribute :email, :ci_string do
       allow_nil? false
       public? true
+    end
+
+    attribute :hashed_password, :string do
+      sensitive? true
     end
 
     attribute :given_name, :string do
