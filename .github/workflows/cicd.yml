@@ -157,7 +157,7 @@ jobs:
       # Build into the local docker daemon so Trivy can scan the exact image
       # before the push step below publishes it.
       - name: Build image
-        uses: docker/build-push-action@v7.3.0
+        uses: docker/build-push-action@v7.4.0
         with:
           context: .
           push: false
